@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Книги</title>
+    <script>
+    function updateIsRead(bookId) {
+        const checkbox = document.getElementById('is_read_' + bookId);
+        fetch('/update_is_read/' + bookId, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({is_read: checkbox.checked})
+        }).then(response => response.json())
+          .then(data => {
+            if (!data.success) alert('Ошибка сохранения');
+          });
+    }
+    </script>
+</head>
+<body>
+    <h1>Последние 15 книг:</h1>
+    <ul>
+        {% for book in books %}
+        <li>
+            <b>{{ book.title }}</b> — {{ book.author }}
+            (Жанр: <a href="{{ url_for('genre_page', genre_id=book.genre.id) }}">{{ book.genre.name }}</a>)
+            <input type="checkbox" id="is_read_{{ book.id }}" {% if book.is_read %}checked{% endif %}>
+            <button onclick="updateIsRead({ book_id })">Сохранить</button>
+        </li>
+        {% endfor %}
+    </ul>
+    <h2>Добавить жанр</h2>
+    <form method="post" action="{{ url_for('add_genre') }}">
+    <input type="text" name="genre_name" placeholder="Название жанра" required>
+    <button type="submit">Добавить жанр</button >
+    </form>
+    
+    <h2>Добавить книгу:</h2>
+    <form method="post" action="{{ url_for('add_book') }}">
+        <input type="text" name="title" placeholder="Название" required>
+        <input type="text" name="author" placeholder="Автор" required>
+        <select name="genre_id" required>
+            {% for genre in genres %}
+            <option value="{{ genre.id }}">{{ genre.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Добавить</button>
+    </form>
+</body>
+</html>
